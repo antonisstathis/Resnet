@@ -117,6 +117,23 @@ public:
 		}
 
 public:
+	double computePoint(double**** weights,double*** inp,int nk,     int pointX,  int pointY, int kd,int depth,double bias){
+	    double acc = 0.0;
+	
+	    for (int i = 0; i < kd; i++) {
+	        for (int j = 0; j < kd; j++) {
+	            for (int k = 0; k < depth; k++) {
+	                double in_val  = inp[pointX + i][pointY + j][k];
+	                double w_val   = weights[i][j][k][nk];
+	                acc += in_val * w_val;
+	            }
+	        }
+	    }
+	
+	    return acc + bias;
+	}
+
+public:
 	void loadDimensions(int stride) {
 	    // Dimensions of kernels volume
 	    kn    = kernels->getNK();
