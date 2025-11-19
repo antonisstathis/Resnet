@@ -57,14 +57,10 @@ public:
 public:
 	void run(bool bp, int stride)
 	{
-	    //
 	    // 1. Load dimensions and adjust output sizes
-	    //
 	    loadDimensions(stride);
 	
-	    //
 	    // 2. Allocate local buffers
-	    //
 	    double***  inp;
 	    double**** weights;
 	    double*    biases;
@@ -72,16 +68,12 @@ public:
 	
 	    allocateLocalBuffers(inp, weights, biases, outputs);
 	
-	    //
 	    // 3. Load input, weights, and biases
-	    //
 	    loadInputs(inp);
 	    loadWeights(weights);
 	    loadBiases(biases);
 	
-	    //
 	    // 4. Sliding window convolution loop
-	    //
 	    int reps    = 1;
 	    int nk      = 0;      // kernel index
 	    int row     = 0;      // output row
@@ -95,19 +87,13 @@ public:
 	
 	    while (reps < totalReps)
 	    {
-	        //
 	        // 4a. Compute one convolution value
-	        //
 	        double result = computePoint(weights,inp,nk,x,y,kd,depth,biases[nk]);
 	
-	        //
 	        // 4b. Store output
-	        //
 	        outputs[row][column][nk] = result;
 	
-	        //
 	        // 4c. Advance output (row, column)
-	        //
 	        column++;
 	        if (column == Y) {
 	            column = 0;
@@ -116,14 +102,10 @@ public:
 	        if (row == X)
 	            row = 0;
 	
-	        //
 	        // 4d. Update sliding window counters
-	        //
 	        updateSlidingWindowCounters(reps,pointX,pointY,x,y,nk,stride,X,Y,kn);
-	
-	        //
+
 	        // 4e. Flush outputs if needed
-	        //
 	        flushOutputsIfNeeded(reps,X,Y,kn,Z,outputs,output,bypass,bp);
 	    }
 	}
@@ -152,16 +134,7 @@ public:
 		    while (reps < totalReps) {
 		
 		        // 1. Compute convolution point
-		        double acc = computePoint(
-		            weights,
-		            inp,
-		            nk,
-		            x,
-		            y,
-		            kd,
-		            depth,
-		            biases[nk]
-		        );
+		        double acc = computePoint(weights,inp,nk,x,y,kd,depth,biases[nk]);
 		
 		        // 2. Store result
 		        outputs[row][column][nk] = acc;
@@ -176,31 +149,10 @@ public:
 		            row = 0;
 		
 		        // 3. Update sliding window pointers
-		        updateSlidingWindowCounters(
-		            reps,
-		            pointX,
-		            pointY,
-		            x,
-		            y,
-		            nk,
-		            stride,
-		            X,
-		            Y,
-		            kn
-		        );
+		        updateSlidingWindowCounters(reps,pointX,pointY,x,y,nk,stride,X,Y,kn);
 		
 		        // 4. Write out results if full block is ready
-		        flushOutputsIfNeeded(
-		            reps,
-		            X,
-		            Y,
-		            kn,
-		            Z,
-		            outputs,
-		            output,
-		            bypass,
-		            bp
-		        );
+		        flushOutputsIfNeeded(reps,X,Y,kn,Z,outputs,output,bypass,bp);
 		    }
 		}
 
