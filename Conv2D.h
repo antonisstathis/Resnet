@@ -204,11 +204,7 @@ public:
 	}
 
 public:
-	void allocateLocalBuffers(double***& inp,
-	                          double****& weights,
-	                          double*& biases,
-	                          double***& outputs)
-	{
+	void allocateLocalBuffers(double***& inp,double****& weights,double*& biases,double***& outputs) {
 	    int d1 = input->getX();
 	    int d2 = input->getY();
 	    int d3 = input->getZ();
