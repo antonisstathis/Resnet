@@ -73,39 +73,7 @@ public:
 	    loadBiases(biases);
 	
 	    // 4. Sliding window convolution loop
-	    int reps    = 1;
-	    int nk      = 0;      // kernel index
-	    int row     = 0;      // output row
-	    int column  = 0;      // output column
-	    int pointX  = 0;      // sliding window X
-	    int pointY  = 0;      // sliding window Y
-	    int x       = 0;      // current X
-	    int y       = 0;      // current Y
-	    int totalReps = (X * 8) * Y * kn + 1;
-	
-	    while (reps < totalReps)
-	    {
-	        // 4a. Compute one convolution value
-	        double result = computePoint(weights,inp,nk,x,y,kd,depth,biases[nk]);
-	
-	        // 4b. Store output
-	        outputs[row][column][nk] = result;
-	
-	        // 4c. Advance output (row, column)
-	        column++;
-	        if (column == Y) {
-	            column = 0;
-	            row++;
-	        }
-	        if (row == X)
-	            row = 0;
-	
-	        // 4d. Update sliding window counters
-	        updateSlidingWindowCounters(reps,pointX,pointY,x,y,nk,stride,X,Y,kn);
-
-	        // 4e. Flush outputs if needed
-	        flushOutputsIfNeeded(reps,X,Y,kn,Z,outputs,output,bypass,bp);
-	    }
+	    runConvolutionLoop(weights,inp,biases,outputs,bp);
 	}
 
 public:
