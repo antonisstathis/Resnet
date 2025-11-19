@@ -57,59 +57,26 @@ public:
 public:
 	void run(boolean bp,int stride){
 		
-		// Dimensions of kernels volume
-		kn = (*kernels).getNK();
-		kd = (*kernels).getKD();
-		depth = (*kernels).getDepth();
-		// Dimensions of output volume
-		X = (*input).getX() - (kd-1);
-		Y = (*input).getY() - (kd-1);
-		Z = (*kernels).getNK();
-		// Set output volume dimensions
-		(*output).setZ(Z);
-		this->stride = stride;
-		if(stride==2){
-			X = X/2;
-			Y = Y/2;
-			(*output).setX(X);
-			(*output).setY(Y);
-			(*bypass).setX(X);
-			(*bypass).setY(Y);
-		}
-
-		int d1 = (*input).getX();
-		int d2 = (*input).getY();
-		int d3 = (*input).getZ();
-		double inp[d1][d2][d3];
-		double weights[kd][kd][depth][kn];
-		double biases[kn];
-		X=X/8;
-		double outputs[X][Y][Z];
-
-		// Load inputs
-		for(int k=0;k<(*input).getZ();k++){
-			for(int i=0;i<(*input).getX();i++){
-				for(int j=0;j<(*input).getY();j++){
-					inp[i][j][k] = (*input).getData();
-				}
-			}
-		}
-
-		// Load weights 
-		for(int n=0;n<kn;n++){
-			for(int k=0;k<depth;k++){
-				for(int i=0;i<kd;i++){
-					for(int j=0;j<kd;j++){
-						weights[i][j][k][n] = (*kernels).getWeight();
-					}
-				}
-			}
-		}
-
-		// Load biases
-		for(int i=0;i<kn;i++){
-			biases[i] = (*kernels).getBias();
-		}
+		// 1. Load dims + adjust output size
+	    loadDimensions(stride);
+	
+	    // Local buffers
+	    double*** inp;
+	    double**** weights;
+	    double* biases;
+	    double*** outputs;
+	
+	    // 2. Allocate buffers based on dynamic dimensions
+	    allocateLocalBuffers(inp, weights, biases, outputs);
+	
+	    // 3. Load input feature maps
+	    loadInputs(inp);
+	
+	    // 4. Load kernel weights
+	    loadWeights(weights);
+	
+	    // 5. Load biases
+	    loadBiases(biases);
 
 		int reps=1;
 		int nk=0;
