@@ -109,13 +109,7 @@ public:
 	}
 
 public:
-	void runConvolutionLoop(
-        double**** weights,
-        double*** inp,
-        double* biases,
-        double*** outputs,
-        bool bp)
-		{
+	void runConvolutionLoop(double**** weights,double*** inp,double* biases,double*** outputs,bool bp) {
 		    int reps    = 1;
 		    int nk      = 0;
 		    int row     = 0;
