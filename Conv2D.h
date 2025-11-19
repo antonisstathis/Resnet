@@ -65,7 +65,6 @@ public:
 	    double**** weights;
 	    double*    biases;
 	    double***  outputs;
-	
 	    allocateLocalBuffers(inp, weights, biases, outputs);
 	
 	    // 3. Load input, weights, and biases
@@ -82,7 +81,6 @@ public:
 	    int pointY  = 0;      // sliding window Y
 	    int x       = 0;      // current X
 	    int y       = 0;      // current Y
-	
 	    int totalReps = (X * 8) * Y * kn + 1;
 	
 	    while (reps < totalReps)
