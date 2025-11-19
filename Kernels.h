@@ -18,8 +18,6 @@ using namespace std;
 class Kernels {
 
 private:
-		//double* weights;
-		//double* biases;
 		int dimension;
 		int depth;
 		int NK;
@@ -94,16 +92,7 @@ public:
 
 		return depth;
 	}
-
-/*
-public:
-	double getBias(int i) {
-
-		return biases[i];
-	}
-*/
 	
-
 };
 
 
