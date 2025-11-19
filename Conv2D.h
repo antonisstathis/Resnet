@@ -55,7 +55,7 @@ public:
 	}
 
 public:
-	void run(boolean bp,int stride){
+	void run(boolean bp,int stride) {
 		
 		// 1. Load dims + adjust output size
 	    loadDimensions(stride);
@@ -157,9 +157,111 @@ public:
 				double outputs[X][Y][Z];
 			}
 		}
+	}
 
-		// Write outputs
+	void loadDimensions(int stride) {
+	    // Dimensions of kernels volume
+	    kn    = kernels->getNK();
+	    kd    = kernels->getKD();
+	    depth = kernels->getDepth();
+	
+	    // Dimensions of output volume
+	    X = input->getX() - (kd - 1);
+	    Y = input->getY() - (kd - 1);
+	    Z = kernels->getNK();
+	
+	    // Set output Z
+	    output->setZ(Z);
+	
+	    this->stride = stride;
+	
+	    if (stride == 2) {
+	        X = X / 2;
+	        Y = Y / 2;
+	        output->setX(X);
+	        output->setY(Y);
+	        bypass->setX(X);
+	        bypass->setY(Y);
+	    }
+	}
 
+public:
+	void allocateLocalBuffers(double***& inp,
+	                          double****& weights,
+	                          double*& biases,
+	                          double***& outputs)
+	{
+	    int d1 = input->getX();
+	    int d2 = input->getY();
+	    int d3 = input->getZ();
+	
+	    // Allocate 3D inp
+	    inp = new double**[d1];
+	    for (int i = 0; i < d1; i++) {
+	        inp[i] = new double*[d2];
+	        for (int j = 0; j < d2; j++) {
+	            inp[i][j] = new double[d3];
+	        }
+	    }
+	
+	    // Allocate weights[kd][kd][depth][kn]
+	    weights = new double***[kd];
+	    for (int i = 0; i < kd; i++) {
+	        weights[i] = new double**[kd];
+	        for (int j = 0; j < kd; j++) {
+	            weights[i][j] = new double*[depth];
+	            for (int k = 0; k < depth; k++) {
+	                weights[i][j][k] = new double[kn];
+	            }
+	        }
+	    }
+	
+	    // Biases
+	    biases = new double[kn];
+	
+	    // NOTE: your original code has: X = X/8;
+	    X = X / 8;
+	
+	    // Outputs[X][Y][Z]
+	    outputs = new double**[X];
+	    for (int i = 0; i < X; i++) {
+	        outputs[i] = new double*[Y];
+	        for (int j = 0; j < Y; j++) {
+	            outputs[i][j] = new double[Z];
+	        }
+	    }
+	}
+
+
+public:
+	void loadInputs(double*** inp) {
+	    for (int k = 0; k < input->getZ(); k++) {
+	        for (int i = 0; i < input->getX(); i++) {
+	            for (int j = 0; j < input->getY(); j++) {
+	                inp[i][j][k] = input->getData();
+	            }
+	        }
+	    }
+	}
+
+public:
+	void loadWeights(double**** weights) {
+	    for (int n = 0; n < kn; n++) {
+	        for (int k = 0; k < depth; k++) {
+	            for (int i = 0; i < kd; i++) {
+	                for (int j = 0; j < kd; j++) {
+	                    weights[i][j][k][n] = kernels->getWeight();
+	                }
+	            }
+	        }
+	    }
+	}
+
+public:
+	void loadBiases(double* biases) {
+	    for (int i = 0; i < kn; i++) {
+	        biases[i] = kernels->getBias();
+	    }
 	}
 
 public:
@@ -174,37 +276,6 @@ public:
 		input = in;
 		output = out;
 	}
-/*
-public:
-	void saveOutput () {
-
-		string filePath("out.txt");
-		ofstream File1(filePath);
-		string filePath1("out1.txt");
-		ofstream File2(filePath1);
-
-		for(int l=0;l<kn;l++){
-			string out = to_string(l+1);
-			out = "\n\nFeature map " + out + "\n\n";
-			File1 << out;
-			for(int x=0;x<X;x++){
-				for(int y=0;y<Y;y++){
-					string data = to_string(output[x][y][l]);
-					File1 << data;
-					File1 << "\n";
-					File2 << data;
-					File2 << "\n";
-
-				}
-			}
-			File1 << "\n";
-		}
-
-		File1.close();
-		File2.close();
-
-	}
-*/
 
 	void setStride(int s) {
 
