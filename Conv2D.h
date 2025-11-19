@@ -134,6 +134,31 @@ public:
 	}
 
 public:
+	void updateSlidingWindowCounters(int& reps,int& pointX,int& pointY,int& x,int& y,int& nk,int stride,int X,int Y,int kn) {
+	    reps++;
+	
+	    // Update Y position
+	    if (reps % Y == 0)
+	        pointY = 0;
+	    else
+	        pointY += stride;
+	
+	    y = pointY;
+	
+	    // Update X position and kernel index
+	    if (reps % Y == 0 && pointX < X)
+	        pointX += stride;
+	
+	    if (pointX == X) {
+	        pointX = 0;
+	        if (nk < kn)
+	            nk++;
+	    }
+	
+	    x = pointX;
+	}
+
+public:
 	void loadDimensions(int stride) {
 	    // Dimensions of kernels volume
 	    kn    = kernels->getNK();
