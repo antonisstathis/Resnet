@@ -55,110 +55,156 @@ public:
 	}
 
 public:
-	void run(boolean bp,int stride) {
-		
-		// 1. Load dims + adjust output size
+	void run(bool bp, int stride)
+	{
+	    //
+	    // 1. Load dimensions and adjust output sizes
+	    //
 	    loadDimensions(stride);
 	
-	    // Local buffers
-	    double*** inp;
+	    //
+	    // 2. Allocate local buffers
+	    //
+	    double***  inp;
 	    double**** weights;
-	    double* biases;
-	    double*** outputs;
+	    double*    biases;
+	    double***  outputs;
 	
-	    // 2. Allocate buffers based on dynamic dimensions
 	    allocateLocalBuffers(inp, weights, biases, outputs);
 	
-	    // 3. Load input feature maps
+	    //
+	    // 3. Load input, weights, and biases
+	    //
 	    loadInputs(inp);
-	
-	    // 4. Load kernel weights
 	    loadWeights(weights);
-	
-	    // 5. Load biases
 	    loadBiases(biases);
-
-		int reps=1;
-		int nk=0;
-		int x=0;
-		int y=0;
-		int pointY=0;
-		int pointX=0;
-		int row = 0;
-		int column = 0;
-		double weight = 0;
-		double in = 0;
-		double acc = 0;
-		double bias = 0;
-
-		while(reps<((X*8)*Y*kn)+1) {
-
-			for(int i=0;i<kd;i++) {
-				for(int j=0;j<kd;j++) {
-					for(int k=0;k<(*input).getZ();k++) {
-						weight = weights[i][j][k][nk];
-						in = inp[x][y][k];
-						acc = acc + in*weight;
-					}
-					y++;
-				}
-				y = pointY;
-				x++;
-			}
-			x = pointX;
-			bias = biases[nk];
-			acc = acc + bias;
-
-			outputs[row][column][nk] = acc;
-			//activationFunc(acc);
-			acc = 0;
-
-			column++;
-			if(column==Y) {
-				row++;
-				column = 0;
-			}
-			if(row==X) {
-				row=0;
-			}
-
-			reps++;
-			if(reps%Y==0) {
-				pointY=0;
-			}
-			else {
-				pointY = pointY + stride;
-			}
-			y = pointY;
-
-			if(reps%Y==0 && pointX<X) {
-				pointX = pointX + stride;
-			}
-			if(pointX==X) {
-				pointX=0;
-				if(nk<kn)
-					nk++;
-			}
-			x=pointX;
-			
-			// Write outputs
-			if(reps%(X*Y*kn)==0){
-				cout << "\nreps=" << reps << "\n";
-				for(int i=0;i<X;i++){
-					for(int j=0;j<Y;j++){
-						for(int k=0;k<Z;k++){
-							(*output).writeData(outputs[i][j][k]);
-							if(bp==true){
-								(*bypass).writeData(outputs[i][j][k]);
-							}
-						}
-					}
-				}
-				double outputs[X][Y][Z];
-			}
-		}
+	
+	    //
+	    // 4. Sliding window convolution loop
+	    //
+	    int reps    = 1;
+	    int nk      = 0;      // kernel index
+	    int row     = 0;      // output row
+	    int column  = 0;      // output column
+	    int pointX  = 0;      // sliding window X
+	    int pointY  = 0;      // sliding window Y
+	    int x       = 0;      // current X
+	    int y       = 0;      // current Y
+	
+	    int totalReps = (X * 8) * Y * kn + 1;
+	
+	    while (reps < totalReps)
+	    {
+	        //
+	        // 4a. Compute one convolution value
+	        //
+	        double result = computePoint(weights,inp,nk,x,y,kd,depth,biases[nk]);
+	
+	        //
+	        // 4b. Store output
+	        //
+	        outputs[row][column][nk] = result;
+	
+	        //
+	        // 4c. Advance output (row, column)
+	        //
+	        column++;
+	        if (column == Y) {
+	            column = 0;
+	            row++;
+	        }
+	        if (row == X)
+	            row = 0;
+	
+	        //
+	        // 4d. Update sliding window counters
+	        //
+	        updateSlidingWindowCounters(reps,pointX,pointY,x,y,nk,stride,X,Y,kn);
+	
+	        //
+	        // 4e. Flush outputs if needed
+	        //
+	        flushOutputsIfNeeded(reps,X,Y,kn,Z,outputs,output,bypass,bp);
+	    }
 	}
 
+public:
+	void runConvolutionLoop(
+        double**** weights,
+        double*** inp,
+        double* biases,
+        double*** outputs,
+        bool bp)
+		{
+		    int reps    = 1;
+		    int nk      = 0;
+		    int row     = 0;
+		    int column  = 0;
+		
+		    int pointX  = 0;
+		    int pointY  = 0;
+		
+		    int x = 0;
+		    int y = 0;
+		
+		    int totalReps = (X * 8) * Y * kn + 1;
+		
+		    while (reps < totalReps) {
+		
+		        // 1. Compute convolution point
+		        double acc = computePoint(
+		            weights,
+		            inp,
+		            nk,
+		            x,
+		            y,
+		            kd,
+		            depth,
+		            biases[nk]
+		        );
+		
+		        // 2. Store result
+		        outputs[row][column][nk] = acc;
+		
+		        // Update output coordinates
+		        column++;
+		        if (column == Y) {
+		            column = 0;
+		            row++;
+		        }
+		        if (row == X)
+		            row = 0;
+		
+		        // 3. Update sliding window pointers
+		        updateSlidingWindowCounters(
+		            reps,
+		            pointX,
+		            pointY,
+		            x,
+		            y,
+		            nk,
+		            stride,
+		            X,
+		            Y,
+		            kn
+		        );
+		
+		        // 4. Write out results if full block is ready
+		        flushOutputsIfNeeded(
+		            reps,
+		            X,
+		            Y,
+		            kn,
+		            Z,
+		            outputs,
+		            output,
+		            bypass,
+		            bp
+		        );
+		    }
+		}
+
+public:
 	void loadDimensions(int stride) {
 	    // Dimensions of kernels volume
 	    kn    = kernels->getNK();
