@@ -77,7 +77,6 @@ public:
 			(*bypass).setY(Y);
 		}
 
-		//cout << "run function\n";
 		int d1 = (*input).getX();
 		int d2 = (*input).getY();
 		int d3 = (*input).getZ();
@@ -91,7 +90,6 @@ public:
 		for(int k=0;k<(*input).getZ();k++){
 			for(int i=0;i<(*input).getX();i++){
 				for(int j=0;j<(*input).getY();j++){
-					//cout << k << " " << i << " " << j << "\n";
 					inp[i][j][k] = (*input).getData();
 				}
 			}
@@ -132,9 +130,7 @@ public:
 				for(int j=0;j<kd;j++) {
 					for(int k=0;k<(*input).getZ();k++) {
 						weight = weights[i][j][k][nk];
-						//System.out.println(kernel);
 						in = inp[x][y][k];
-						//System.out.println(in);
 						acc = acc + in*weight;
 					}
 					y++;
@@ -170,7 +166,6 @@ public:
 
 			if(reps%Y==0 && pointX<X) {
 				pointX = pointX + stride;
-				//System.out.println(pointX);
 			}
 			if(pointX==X) {
 				pointX=0;
@@ -194,8 +189,6 @@ public:
 				}
 				double outputs[X][Y][Z];
 			}
-
-			//System.out.printf("reps=%d\n",reps);
 		}
 
 		// Write outputs
