@@ -25,7 +25,6 @@ int main(){
 	Conv2D layer(map1,bypass,kernels[0],map2);
 	layer.run(true,2);
 	cout << "Layer 1 finished\n";
-	//(*output).writeFile();
 
 	AvgPool pl(map2,bypass,map1);
 	pl.run(true);
@@ -49,7 +48,6 @@ int main(){
 			layer.run(false,1);
 		}
 		cout << "Layer " << i << " finished.\n";
-		//(*output).writeFile();
 	}
 	// Run average pooling layer
 	// AvgPool pl();
