@@ -159,6 +159,24 @@ public:
 	}
 
 public:
+	void flushOutputsIfNeeded(int reps,int X,int Y,int kn,int Z,double*** outputs,FeatureMaps* output,FeatureMaps* bypass,bool bp) {
+	    if (reps % (X * Y * kn) != 0)
+	        return;
+	
+	    for (int i = 0; i < X; i++) {
+	        for (int j = 0; j < Y; j++) {
+	            for (int k = 0; k < Z; k++) {
+	
+	                double val = outputs[i][j][k];
+	                output->writeData(val);
+	                if (bp)
+	                    bypass->writeData(val);
+	            }
+	        }
+	    }
+	}
+
+public:
 	void loadDimensions(int stride) {
 	    // Dimensions of kernels volume
 	    kn    = kernels->getNK();
