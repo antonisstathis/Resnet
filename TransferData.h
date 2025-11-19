@@ -29,7 +29,6 @@ public:
 		for(int k=0;k<(*output).getZ();k++){
 			for(int i=0;i<(*output).getX();i++){
 				for(int j=0;j<(*output).getY();j++){
-					//cout << k << " " << i << " " << j << "\n";
 					out[i][j][k] = (*output).getData();
 				}
 			}
@@ -38,7 +37,6 @@ public:
 		for(int k=0;k<(*bypass).getZ();k++){
 			for(int i=0;i<(*bypass).getX();i++){
 				for(int j=0;j<(*bypass).getY();j++){
-					//cout << k << " " << i << " " << j << "\n";
 					bp[i][j][k] = (*bypass).getData();
 				}
 			}
