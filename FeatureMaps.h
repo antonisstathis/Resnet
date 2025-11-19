@@ -22,7 +22,6 @@ private:
 	int X;
 	int Y;
 	int Z;
-	//double* input;
 	ac_channel<double> map;
 	string padding;
 
@@ -35,17 +34,11 @@ public:
 			X = x;
 			Y = y;
 			Z = z;
-			//double in[X][Y][Z];
-			//input=in;
-			//input = (float*) malloc(X*Y*Z*sizeof(float));
 		}
 		if(padding=="padding") {
 			X=x+2;
 			Y=y+2;
 			Z=z;
-			//double in[X][Y][Z];
-			//input=in;
-			//input = (float*) malloc(X*Y*Z*sizeof(float));
 		}
 		
 		if(con==1){
@@ -90,14 +83,6 @@ public:
 
 		MyFile.close();
 	}
-
-/*
-public:
-	double getData(int i,int j,int k) {
-
-		return input[i][j][k];
-	}
-*/
 
 public:
 	void writeData(double data){
@@ -170,23 +155,6 @@ public:
 		file.close();
 
 	}
-
-/*
-public:
-	void printVolume(){
-
-		double data=0;
-		for(int k=0;k<Z;k++) {
-			for(int i=0;i<X;i++){
-				for(int j=0;j<Y;j++){
-					data=input[i][j][k];
-					cout << data << "\n";
-				}
-			}
-		}
-
-	}
-*/
 
 };
 
